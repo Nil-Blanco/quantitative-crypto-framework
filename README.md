@@ -10,6 +10,14 @@ This repository contains a suite of Python-based quantitative tools for cryptocu
 * **`rebalance.py`**: Object-Oriented simulator for multi-asset portfolio rebalancing, evaluating algorithmic risk mitigation against traditional Buy & Hold strategies.
 * **`figures/`**: Directory containing generated visualization outputs of the backtesting results.
 
+## 🔌 Data Acquisition & API Management
+
+Market data is retrieved utilizing the **Binance API**. To ensure robust, secure, and uninterrupted execution, the framework implements the following protocols:
+
+* **Credential Security:** API keys and sensitive environment variables are strictly managed locally via `.env` files and are explicitly excluded from version control (`.gitignore`).
+* **Rate Limit Handling:** Built-in request pacing and sleep functions are integrated to strictly adhere to Binance's API rate limits. This prevents IP bans and ensures data pipeline stability during extensive historical data extraction and live backtesting sessions.
+
+
 ### 📊 Performance Analysis & Stress Testing
 
 The strategies have been rigorously backtested across the top 3 highest-capitalization assets (excluding stablecoins): **Bitcoin (BTC), Ethereum (ETH), and Solana (SOL)** against USDT.
