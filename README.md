@@ -1,30 +1,42 @@
-## 📈 Quantitative Crypto Trading Systems
+# Quantitative Crypto Framework
 
-This repository contains a suite of Python-based quantitative tools for cryptocurrency market analysis, algorithmic backtesting, and portfolio management. The project is modularized to separate indicator logic, strategy simulation, and portfolio rebalancing.
+## Overview
+This repository contains a modular, production-ready quantitative trading framework designed for digital asset analysis, backtesting, and automated execution. Developed with a strict mathematical and computational focus, the architecture spans from high-frequency, loop-free simulation engines to macro trend-following indicators and portfolio rebalancing modules.
 
-### 🗂️ Repository Structure
+---
 
-* **`BMSB.py` & `BMSB_conf.py`**: Core logic and configuration parameters for calculating the Bull Market Support Band, a key macroeconomic indicator for market cycle analysis.
-* **`backtest_long_only_trailing.py`**: Event-driven backtesting engine focused on long-only strategies utilizing trailing stop-loss mechanisms to maximize upside while protecting capital.
-* **`backtest_market_structure.py`**: Advanced backtesting framework designed to execute trades based on shifts in underlying market structure and support/resistance confluences.
-* **`rebalance.py`**: Object-Oriented simulator for multi-asset portfolio rebalancing, evaluating algorithmic risk mitigation against traditional Buy & Hold strategies.
-* **`figures/`**: Directory containing generated visualization outputs of the backtesting results.
+## Repository Architecture & Modules
 
-### 🔌 Data Acquisition & API Management
+### Module 1: High-Performance Vectorized Backtesting Engine (Core Component)
+The core simulation sub-system is a fully vectorized algorithmic backtesting engine built to evaluate short-term liquidity dislocations (pullbacks) within established macroeconomic uptrends. It completely eliminates iterative time-stepping (e.g., standard `for` loops or Pandas `iterrows()`), achieving $O(1)$ computational efficiency relative to row-by-row iteration.
 
-Market data is retrieved utilizing the **Binance API**. To ensure robust, secure, and uninterrupted execution, the framework implements the following protocols:
+#### Mathematical Strategy Definition
+* **Signal Generation:** A primary signal is triggered at time $t$ if the structural and momentum conditions are simultaneously satisfied:
+$$C_t > \frac{1}{200} \sum_{i=0}^{199} C_{t-i}$$
+$$\%K_t = \frac{C_t - L_{10}}{H_{10} - L_{10}} \times 100 < 5$$
+* **Execution & Limit Order Simulation:** Resting limit orders are simulated at a fixed 3% discount to the closing price ($P_{buy} = C_t \times 0.97$). Execution occurs if the low price satisfies $L_{t+i} \le P_{buy}$ within a forward-looking matrix window ($i \in [1, 10]$).
+* **Computational Optimization:** Implements temporal matrix shifting to project future price vectors into the current row context. Optimal entry and exit points are isolated instantly via vectorized boolean masks and cumulative summation checks (`cumsum(axis=1) == 1`).
 
-* **Credential Security:** API keys and sensitive environment variables are strictly managed locally via `.env` files and are explicitly excluded from version control (`.gitignore`).
-* **Rate Limit Handling:** Built-in request pacing and sleep functions are integrated to strictly adhere to Binance's API rate limits. This prevents IP bans and ensures data pipeline stability during extensive historical data extraction and live backtesting sessions.
+---
 
+### Module 2: Algorithmic Portfolio Rebalancing (Binance API Integration)
+An automated asset allocation and risk-mitigation module designed to interface directly with spot/margin accounts via the Binance API.
 
-### 📊 Performance Analysis & Stress Testing
+* **Dynamic Weight Adjustment:** The script tracks portfolio drift away from predefined target asset weights by calculating real-time geometric distances across asset vectors.
+* **Execution Optimization:** Incorporates threshold-based execution bands (e.g., trigger rebalancing only when a specific asset deviates by $\pm X\%$ from its target). This optimization minimizes trading drag, controls transaction fee overhead, and protects capital against micro-volatility noise.
 
-The strategies have been rigorously backtested across the top 3 highest-capitalization assets (excluding stablecoins): **Bitcoin (BTC), Ethereum (ETH), and Solana (SOL)** against USDT.
+---
 
-To ensure the robustness of the algorithms across different market conditions, the data pipeline extracts and analyzes historical data across three strategic timeframes:
-* **4000 Days (Macro Long-Term):** Evaluates the strategy's compounding efficiency and overall performance across multiple complete macroeconomic cycles (halving cycles).
-* **1000 Days (Post-Bear Recovery):** Measures the algorithm's ability to identify accumulation zones and capitalize on the transition from a bear market bottom into a new expansionary phase.
-* **300 Days (Bear Market Stress-Test):** A localized stress-test designed to evaluate the strategy's capital preservation and risk mitigation during a strict bearish or consolidatory cycle.
+### Module 3: Secular Trend Filtering (Bull Market Support Band Framework)
+A macro-directional regime filter utilized to dynamically adjust market exposure based on long-term support and resistance boundaries.
 
-Visual performance metrics for each asset and timeframe can be reviewed in the `figures/` directory.
+* **Mathematical Foundation:** Implements a dynamic indicator band that synthesizes the 20-week Exponential Moving Average (EMA) and the 21-week Simple Moving Average (SMA).
+* **System Integration:** Acts as a systematic programmatic switch (`True/False` regime filter). Underlying algorithmic strategies reference this module to scale position sizes up or down depending on whether the macro market environment is classified as a structural expansion or contraction regime.
+
+---
+
+## Technical Stack & Dependencies
+* **Data Manipulation & Processing:** `pandas`, `numpy` (heavy utilization of vectorization and matrix calculations).
+* **Data Ingestion:** `yfinance` (historical analysis) and `Binance API` wrappers.
+* **Technical Analysis:** `ta` library for structural momentum equations.
+* **Visualization:** `matplotlib` for equity curve tracking, asset allocation distributions, and trade execution mapping.
